@@ -3,61 +3,9 @@ package com.abdulbasit
 import kotlin.system.exitProcess
 
 /**
- * Prompt
- *
- * @param msg
- * @return
+ * Lib
  */
-
-private fun prompt(msg: String): String {
-    print(msg)
-    return readln().trim()
-}
-
-private fun printMenu() {
-    println(
-        """
-        ---------------- Library Console ----------------
-        1) Add new library item
-        2) Register new member
-        3) Borrow item
-        4) Return item
-        5) Search items
-        6) View member borrowing history
-        7) Generate library reports
-        8) Calculate and process late fees
-        9) Renew item (bonus)
-        0) Exit
-        -------------------------------------------------
-        """.trimIndent()
-    )
-}
-
-/**
- * Add sample data
- *
- * @param library
- */
-
-private fun addSampleData(library: Library) {
-    // Sample items
-    val b1 = Book("B001", "The Kotlin Guide", "Kashif", "9781234567890", 300)
-    val b2 = Book("B002", "Effective Kotlin", "AbdulBasit", "9788328343787", 360)
-    val d1 = DVD("D001", "Kotlin Tutorial", "Ahmed Ali", 120, "Educational")
-    val m1 = Magazine("M001", "Tech Monthly", 42, "TechPress")
-
-    library.addItem(b1, "Non-Fiction")
-    library.addItem(b2, "Non-Fiction")
-    library.addItem(d1, "Reference")
-    library.addItem(m1, "Periodicals")
-
-
-    // Members
-    val alice = Member("M001", "Alice Johnson", "alice@email.com")
-    val bob = Member("M002", "Bob Lee", "bob.lee@email.com")
-    library.registerMember(alice)
-    library.registerMember(bob)
-}
+private val lib = Library()
 
 /**
  * Main
@@ -65,146 +13,201 @@ private fun addSampleData(library: Library) {
  */
 
 fun main() {
-    val library = Library()
-    addSampleData(library)
+    addSampleData()
+    menu()
+}
 
+/**
+ * Menu
+ *
+ */
+private fun menu() {
     while (true) {
-        printMenu()
-        when (prompt("Choose: ")) {
-            "1" -> {
-                println("Add Item: 1) Book 2) DVD 3) Magazine")
-                when (prompt("Type: ")) {
-                    "1" -> {
-                        val id = LibraryUtils.generateItemId("B")
-                        val title = prompt("Title: ")
-                        val author = prompt("Author: ")
-                        val isbn = prompt("ISBN (10 or 13 digits, dashes ok): ")
-                        if (!LibraryUtils.validateISBN(isbn)) {
-                            println("Invalid ISBN.")
-                            continue
-                        }
-                        val pages = prompt("Pages: ").toIntOrNull() ?: run {
-                            println("Invalid pages.")
-                            continue
-                        }
-                        val category = prompt("Category (${LibraryConfig.categories}): ")
-                        library.addItem(Book(id, title, author, isbn, pages), category)
-                        println("Book added with ID $id")
-                    }
-                    "2" -> {
-                        val id = LibraryUtils.generateItemId("D")
-                        val title = prompt("Title: ")
-                        val director = prompt("Director: ")
-                        val duration = prompt("Duration (minutes): ").toIntOrNull() ?: run {
-                            println("Invalid duration.")
-                            continue
-                        }
-                        val genre = prompt("Genre: ")
-                        val category = prompt("Category (${LibraryConfig.categories}): ")
-                        library.addItem(DVD(id, title, director, duration, genre), category)
-                        println("DVD added with ID $id")
-                    }
-                    "3" -> {
-                        val id = LibraryUtils.generateItemId("M")
-                        val title = prompt("Title: ")
-                        val issue = prompt("Issue number: ").toIntOrNull() ?: run {
-                            println("Invalid issue.")
-                            continue
-                        }
-                        val publisher = prompt("Publisher: ")
-                        val category = prompt("Category (${LibraryConfig.categories}): ")
-                        library.addItem(Magazine(id, title, issue, publisher), category)
-                        println("Magazine added with ID $id")
-                    }
-                    else -> println("Unknown type.")
-                }
-            }
-            "2" -> {
-                val id = prompt("Member ID: ")
-                val name = prompt("Name: ")
-                val email = prompt("Email: ")
-                if (!email.isValidEmail()) {
-                    println("Invalid email.")
-                    continue
-                }
-                library.registerMember(Member(id, name, email))
-                println("Member registered.")
-            }
-            "3" -> {
-                val memberId = prompt("Member ID: ")
-                val itemId = prompt("Item ID: ")
-                val ok = library.borrowItem(memberId, itemId)
-                println(if (ok) "Borrowed." else "Borrow failed.")
-            }
-            "4" -> {
-                val memberId = prompt("Member ID: ")
-                val itemId = prompt("Item ID: ")
-                val (ok, fee) = library.returnItem(memberId, itemId)
-                if (ok) {
-                    println("Returned. Late fee: $${"%.2f".format(fee)}")
-                } else println("Return failed.")
-            }
-            "5" -> {
-                println("Search: 1) By title  2) Books by author  3) Generic filter")
-                when (prompt("Type: ")) {
-                    "1" -> {
-                        val q = prompt("Title contains: ")
-                        val res = library.searchByTitle(q)
-                        println("Found ${res.totalFound} item(s) for ${res.searchCriteria}")
-                        res.items.forEach { println(it.getFormattedInfo()) }
-                    }
-                    "2" -> {
-                        val author = prompt("Author: ")
-                        val items = library.findBooksByAuthor(author).filter { it.isAvailable }.map { it.getFormattedInfo() }
-                        if (items.isEmpty()) println("No available books by $author")
-                        else items.forEach(::println)
-                    }
-                    "3" -> {
-                        println("Generic: filter DVDs by genre")
-                        val genre = prompt("Genre equals: ")
-                        val items = library.findItemsBy(DVD::class.java) { it.genre.equals(genre, true) }
-                        if (items.isEmpty()) println("No DVDs in genre '$genre'")
-                        else items.forEach { println(it.getFormattedInfo()) }
-                    }
-                    else -> println("Unknown search type.")
-                }
-            }
-            "6" -> {
-                val memberId = prompt("Member ID: ")
-                val ids = library.memberBorrowedIds(memberId)
-                if (ids.isEmpty()) println("No items currently borrowed.")
-                else {
-                    println("Borrowed item IDs: ${ids.joinToString()}")
-                }
-            }
-            "7" -> {
-                val stats = library.getLibraryStatistics()
-                println("Total by type: " + stats["totalByType"])
-                println("Average pages for books: " + stats["averagePagesForBooks"])
-                println("Most popular DVD genre: " + stats["mostPopularGenreForDVDs"])
-                println("Availability %: ${"%.2f".format(stats["percentageAvailable"] as Double)}")
-            }
-            "8" -> {
-                println("Processing overdue items:")
-                library.processOverdueItems { item, member, daysLate ->
-                    val base = item.calculateLateFee(daysLate)
-                    val compounded = calculateCompoundLateFee(base, daysLate)
-                    val capped = compounded.coerceAtMost(LibraryConfig.lateFeeCap)
-                    println(" - ${item.title} (held by ${member.getName()}) is $daysLate day(s) late. Base: $${"%.2f".format(base)}, Compounded: $${"%.2f".format(compounded)}, Charged: $${"%.2f".format(capped)}")
-                }
-            }
-            "9" -> {
-                val memberId = prompt("Member ID: ")
-                val itemId = prompt("Item ID: ")
-                val ok = library.renewItem(memberId, itemId)
-                println(if (ok) "Renewed." else "Renew failed (limit reached or not owned).")
-            }
-            "0" -> {
-                println("Goodbye!")
-                exitProcess(0)
-            }
-            else -> println("Unknown choice.")
+        println(
+            """
+          --======= Library Menu ======---
+            1) Add new library item
+            2) Register new member
+            3) Borrow item
+            4) Return item
+            5) Search items
+            6) View member borrowing history
+            7) Generate library reports
+            8) Calculate and process late fees
+            9) Renew item
+            0) Exit
+            ______________________________________
+            Choice here : 
+            """.trimIndent()
+        )
+        when (readln().trim()) {
+            "1" -> addItemCli()
+            "2" -> registerCli()
+            "3" -> borrowCli()
+            "4" -> returnCli()
+            "5" -> searchCli()
+            "6" -> historyCli()
+            "7" -> reportCli()
+            "8" -> overdueCli()
+            "9" -> renewCli()
+            "0" -> exitProcess()
+            else -> println("Unknown choice")
         }
-        println()
     }
+}
+
+
+/**
+ * Add sample data
+ * CLI helpers
+ */
+
+private fun addSampleData() {
+    lib.addItem(
+        Book("B1", "The Kotlin Guide", "Moazzam", "9781234567890", 300),
+        "Non-Fiction"
+    )
+    lib.addItem(
+        Book("B2", "Effective Kotlin", "Mark Zee ", "9788328343787", 360),
+        "Non-Fiction"
+    )
+    lib.addItem(
+        DVD("D1", "Kotlin Tutorial", "Alexander", 120, "Educational"),
+        "Reference"
+    )
+    lib.addItem(
+        Magazine("M1", "Tech Monthly", 42, "TechPress"),
+        "Periodicals"
+    )
+    lib.registerMember(Member("M1", "joe Root", "jroot@email.com"))
+    lib.registerMember(Member("M2", "Bruce Lee", "bruce.lee@email.com"))
+}
+
+private fun prompt(msg: String) = print(msg).let { readln().trim() }
+
+/**
+ * Add item cli
+ *
+ */
+private fun addItemCli() {
+    println("Type: 1-Book 2-DVD 3-Magazine")
+    when (readln().trim()) {
+        "1" -> {
+            val id = LibraryUtils.generateItemId("B")
+            val title = prompt("Title: ")
+            val author = prompt("Author: ")
+            val isbn = prompt("ISBN (10/13): ")
+            if (!LibraryUtils.validateISBN(isbn)) {
+                println("Invalid ISBN"); return
+            }
+            val pages = prompt("Pages: ").toIntOrNull() ?: 0
+            lib.addItem(Book(id, title, author, isbn, pages), prompt("Category (${LibraryConfig.categories}): "))
+            println("Book added with ID $id")
+        }
+        "2" -> {
+            val id = LibraryUtils.generateItemId("D")
+            val title = prompt("Title: ")
+            val director = prompt("Director: ")
+            val duration = prompt("Duration (min): ").toIntOrNull() ?: 0
+            val genre = prompt("Genre: ")
+            lib.addItem(DVD(id, title, director, duration, genre), prompt("Category: "))
+            println("DVD added with ID $id")
+        }
+        "3" -> {
+            val id = LibraryUtils.generateItemId("M")
+            val title = prompt("Title: ")
+            val issue = prompt("Issue #: ").toIntOrNull() ?: 0
+            val publisher = prompt("Publisher: ")
+            lib.addItem(Magazine(id, title, issue, publisher), prompt("Category: "))
+            println("Magazine added with ID $id")
+        }
+        else -> println("Unknown type")
+    }
+}
+
+private fun registerCli() {
+    val id = prompt("Member ID (leave blank to auto-generate): ")
+        .ifBlank { LibraryUtils.generateItemId("M") }
+    val name = prompt("Name: ")
+    val email = prompt("Email: ")
+    if (!email.isValidEmail()) {
+        println("Invalid email"); return
+    }
+    lib.registerMember(Member(id, name, email))
+    println("Member registered")
+}
+
+private fun borrowCli() {
+    val ok = lib.borrowItem(prompt("Member ID: "), prompt("Item ID: "))
+    println(if (ok) "Borrowed" else "Borrow failed")
+}
+
+private fun returnCli() {
+    val (ok, fee) = lib.returnItem(prompt("Member ID: "), prompt("Item ID: "))
+    if (ok) println("Returned – late fee \$${"%.2f".format(fee)}") else println("Return failed")
+}
+
+private fun searchCli() {
+    println("Search: 1-By title  2-Books by author  3-DVDs by genre")
+    when (readln().trim()) {
+        "1" -> {
+            val q = prompt("Title contains: ")
+            val res = lib.searchByTitle(q)
+            println("Found ${res.totalFound} item(s)")
+            res.items.forEach { println(it.getFormattedInfo()) }
+        }
+        "2" -> {
+            val author = prompt("Author: ")
+            lib.findBooksByAuthor(author)
+                .filter { it.isAvailable }
+                .forEach { println(it.getFormattedInfo()) }
+        }
+        "3" -> {
+            val genre = prompt("Genre: ")
+            lib.findItemsBy(DVD::class.java) { it.genre.equals(genre, ignoreCase = true) }
+                .forEach { println(it.getFormattedInfo()) }
+        }
+    }
+}
+
+/**
+ * History cli
+ *
+ */
+private fun historyCli() {
+    val ids = lib.memberBorrowedIds(prompt("Member ID: "))
+    if (ids.isEmpty()) println("No items currently borrowed")
+    else println("Borrowed IDs: ${ids.joinToString()}")
+}
+
+private fun reportCli() {
+    println(lib.getLibraryStatistics())
+}
+
+private fun overdueCli() {
+    println("Processing overdue items:")
+    lib.processOverdueItems { item, member, days ->
+        val base = item.calculateLateFee(days)
+        val compound = calculateCompoundLateFee(base, days).coerceAtMost(LibraryConfig.lateFeeCap)
+        println(
+            " - ${item.title} (${member.getName()}) is $days day(s) late. " +
+                    "Base: \$${"%.2f".format(base)}, Charged: \$${"%.2f".format(compound)}"
+        )
+    }
+}
+
+private fun renewCli() {
+    val ok = lib.renewItem(prompt("Member ID: "), prompt("Item ID: "))
+    println(if (ok) "Renewed" else "Renew failed")
+}
+
+/**
+ * Exit process
+ *
+ */
+private fun exitProcess(){
+    // user exit from here
+    println("Good Bye!")
+    exitProcess(0)
+
 }
