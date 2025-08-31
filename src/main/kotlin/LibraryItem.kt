@@ -1,5 +1,13 @@
 package com.abdulbasit
 
+/**
+ * Library item
+ *
+ * @property id
+ * @property title
+ * @property isAvailable
+ * @constructor Create empty Library item
+ */
 
 abstract class LibraryItem(
     val id: String,
@@ -12,6 +20,17 @@ abstract class LibraryItem(
         "ID: $id, Title: $title, Available: $isAvailable"
 }
 
+/**
+ * Book
+ *
+ * @property author
+ * @property isbn
+ * @property pages
+ * @constructor
+ *
+ * @param id
+ * @param title
+ */
 class Book(
     id: String,
     title: String,
@@ -25,6 +44,17 @@ class Book(
         super.displayInfo() + ", Author: $author, ISBN: $isbn, Pages: $pages"
 }
 
+/**
+ * Dvd
+ *
+ * @property director
+ * @property duration
+ * @property genre
+ * @constructor
+ *
+ * @param id
+ * @param title
+ */
 class DVD(
     id: String,
     title: String,
@@ -37,6 +67,17 @@ class DVD(
     override fun displayInfo() =
         super.displayInfo() + ", Director: $director, Duration: ${duration}min, Genre: $genre"
 }
+
+/**
+ * Magazine
+ *
+ * @property issueNumber
+ * @property publisher
+ * @constructor
+ *
+ * @param id
+ * @param title
+ */
 
 class Magazine(
     id: String,

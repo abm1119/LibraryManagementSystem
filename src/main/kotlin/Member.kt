@@ -1,38 +1,35 @@
 package com.abdulbasit
 
 /**
- * Represents a member of the library.
+ * Member
+ *
+ * @property memberId
+ * @property name
+ * @property email
+ * @constructor Create empty Member
  */
-class Member(private val memberId: String,
-             private var name: String,
-             private var email: String)
-{
+
+class Member (
+    private val memberId: String,
+    private var name: String,
+    private var email: String
+) {
     private val borrowedItems = mutableListOf<LibraryItem>()
 
-    fun getMemberId(): String = memberId
-    fun getName(): String = name
-    fun setName(newName: String) {
-        require(newName.isNotBlank()) { "Name cannot be blank." }
-        name = newName.trim()
+    fun getMemberId() = memberId
+    fun getName() = name
+    fun setName( new: String){
+        require(new.isNotBlank()) {"Name cannot blank"}; name = new
     }
 
-    fun getEmail(): String = email
-    fun setEmail(newEmail: String) {
-        require(newEmail.isValidEmail()) { "Invalid email address." }
-        email = newEmail.trim()
-    }
+    fun getEmail()= email
+    fun setEmail(new: String){
+        require(new.isValidEmail()) {"Invalid Email"}; email = new }
 
     fun listBorrowed(): List<LibraryItem> = borrowedItems.toList()
+    internal fun _borrow(item: LibraryItem){ borrowedItems += item}
+    internal fun _return(item: LibraryItem){ borrowedItems += item}
 
-    internal fun _borrow(item: LibraryItem) {
-        borrowedItems += item
-    }
-
-    internal fun _return(item: LibraryItem) {
-        borrowedItems.remove(item)
-    }
-
-
-    fun calculateTotalLateFees(daysLateByItemId: Map<String, Int>): Double =
-        borrowedItems.sumOf { it.calculateLateFee(daysLateByItemId[it.id] ?: 0) }
+    fun totalLateFees(daysMap: Map<String, Int>) =
+        borrowedItems.sumOf { it.calculateLateFee(daysMap[it.id] ?:0) }
 }
