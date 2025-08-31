@@ -2,6 +2,12 @@ package com.abdulbasit
 
 import kotlin.system.exitProcess
 
+/**
+ * Prompt
+ *
+ * @param msg
+ * @return
+ */
 
 private fun prompt(msg: String): String {
     print(msg)
@@ -27,6 +33,12 @@ private fun printMenu() {
     )
 }
 
+/**
+ * Add sample data
+ *
+ * @param library
+ */
+
 private fun addSampleData(library: Library) {
     // Sample items
     val b1 = Book("B001", "The Kotlin Guide", "Kashif", "9781234567890", 300)
@@ -48,8 +60,10 @@ private fun addSampleData(library: Library) {
 }
 
 /**
-  Main Function --
+ * Main
+ *
  */
+
 fun main() {
     val library = Library()
     addSampleData(library)

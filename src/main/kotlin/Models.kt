@@ -4,10 +4,17 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// ---------------- Part 5.1: Data Classes & Sealed Classes ----------------
 /**
- * Represents a library transaction.
+ * Transaction
+ *
+ * @property memberId
+ * @property itemId
+ * @property type
+ * @property date
+ * @property dueDate
+ * @constructor Create empty Transaction
  */
+
 data class Transaction(
     val memberId: String,
     val itemId: String,
@@ -15,22 +22,39 @@ data class Transaction(
     val date: LocalDate,
     val dueDate: LocalDate? = null
 )
-/** Sealed class representing transaction types. */
+
+/**
+ * Transaction type
+ *
+ * @constructor Create empty Transaction type
+ */
 sealed class TransactionType {
     data object Borrow : TransactionType()
     data object Return : TransactionType()
     data class Renew(val newDueDate: LocalDate) : TransactionType()
 }
 
+/**
+ * Search result
+ *
+ * @property items
+ * @property totalFound
+ * @property searchCriteria
+ * @constructor Create empty Search result
+ */
 data class SearchResult(
     val items: List<LibraryItem>,
     val totalFound: Int,
     val searchCriteria: String
 )
 
-// ---------------- Companion Objects & Singleton ----------------
+/**
+ * Library utils
+ *
+ * @constructor Create empty Library utils
+ */
 
-/** Utility class with helper methods and constants. */
+
 class LibraryUtils {
     companion object {
         const val MAX_BORROW_LIMIT = 5
@@ -45,12 +69,17 @@ class LibraryUtils {
         // Simple ISBN-10/13 check (format only)
         fun validateISBN(isbn: String): Boolean {
             val cleaned = isbn.replace("-", "").trim()
-// In Kotlin regex, you must escape the backslash for \d
+
             return cleaned.matches(Regex("^(?:\\d{10}|\\d{13})$"))
         }
     }
 }
-/** Singleton configuration object. */
+
+/**
+ * Library config
+ *
+ * @constructor Create empty Library config
+ */
 object LibraryConfig {
     val categories = listOf("Fiction", "Non-Fiction", "Reference", "Periodicals")
     const val maxRenewalTimes = 2

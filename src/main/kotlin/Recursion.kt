@@ -1,12 +1,26 @@
 package com.abdulbasit
 
-// ----------------Recursion ----------------
+/**
+ * Calculate compound late fee
+ *
+ * @param baseFee
+ * @param days
+ * @return
+ */
 
 fun calculateCompoundLateFee(baseFee: Double, days: Int): Double {
     if (days <= 0) return baseFee
     // Each day adds 5% compound interest recursively
     return calculateCompoundLateFee(baseFee * 1.05, days - 1)
 }
+
+/**
+ * Find all subcategories
+ *
+ * @param category
+ * @param categoryHierarchy
+ * @return
+ */
 
 fun findAllSubcategories(category: String, categoryHierarchy: Map<String, List<String>>): List<String> {
     val direct = categoryHierarchy[category].orEmpty()
@@ -15,6 +29,17 @@ fun findAllSubcategories(category: String, categoryHierarchy: Map<String, List<S
     val deeper = direct.flatMap { child -> findAllSubcategories(child, categoryHierarchy) }
     return (direct + deeper).distinct()
 }
+
+/**
+ * Recursive binary search
+ *
+ * @param T
+ * @param list
+ * @param target
+ * @param low
+ * @param high
+ * @return
+ */
 
 fun <T : Comparable<T>> recursiveBinarySearch(
     list: List<T>,
