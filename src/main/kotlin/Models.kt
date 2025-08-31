@@ -1,8 +1,18 @@
 package com.abdulbasit
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+
+/**
+ * Transaction type
+ *
+ * @constructor Create empty Transaction type
+ */
+
+sealed class TransactionType {
+    object Borrow : TransactionType()
+    object Return : TransactionType()
+    data class Renew(val newDueDate: LocalDate) : TransactionType()
+}
 
 /**
  * Transaction
@@ -14,25 +24,13 @@ import java.util.Locale
  * @property dueDate
  * @constructor Create empty Transaction
  */
-
 data class Transaction(
     val memberId: String,
     val itemId: String,
     val type: TransactionType,
-    val date: LocalDate,
+    val date: LocalDate = LocalDate.now(),
     val dueDate: LocalDate? = null
 )
-
-/**
- * Transaction type
- *
- * @constructor Create empty Transaction type
- */
-sealed class TransactionType {
-    data object Borrow : TransactionType()
-    data object Return : TransactionType()
-    data class Renew(val newDueDate: LocalDate) : TransactionType()
-}
 
 /**
  * Search result
@@ -53,25 +51,16 @@ data class SearchResult(
  *
  * @constructor Create empty Library utils
  */
-
-
 class LibraryUtils {
     companion object {
         const val MAX_BORROW_LIMIT = 5
-        const val DEFAULT_BORROW_DAYS = 14
+        const val DEFAULT_BORROW_DAYS = 14L
 
-        fun generateItemId(type: String): String {
-            val ts = System.currentTimeMillis()
-            val prefix = type.uppercase(Locale.getDefault()).take(1)
-            return "${prefix}${ts.toString().takeLast(7)}"
-        }
+        fun generateItemId(type: String): String =
+            type.uppercase().take(1) + System.currentTimeMillis().toString().takeLast(6)
 
-        // Simple ISBN-10/13 check (format only)
-        fun validateISBN(isbn: String): Boolean {
-            val cleaned = isbn.replace("-", "").trim()
-
-            return cleaned.matches(Regex("^(?:\\d{10}|\\d{13})$"))
-        }
+        fun validateISBN(isbn: String): Boolean =
+            isbn.replace("-", "").matches(Regex("\\d{10}|\\d{13}"))
     }
 }
 
@@ -84,5 +73,4 @@ object LibraryConfig {
     val categories = listOf("Fiction", "Non-Fiction", "Reference", "Periodicals")
     const val maxRenewalTimes = 2
     const val lateFeeCap = 50.0
-    val dateFmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 }
